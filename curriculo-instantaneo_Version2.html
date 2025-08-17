@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Currículo Instantâneo | Gerador de Currículo Profissional</title>
+  <meta name="description" content="Crie seu currículo profissional em minutos com IA. Modelos exclusivos, exporte em PDF, dicas de carreira e mais.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- AdSense (troque pelo seu código real!) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <style>
+    @media print {
+      body { background: white; }
+      .no-print{ display:none !important;}
+      .print\:shadow-none{box-shadow:none !important;}
+    }
+    .ad-placeholder { min-height: 90px; background: #f9fafb; border: 1px dashed #e5e7eb; text-align: center; color: #94a3b8; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-slate-100">
+  <!-- Landing Page -->
+  <div id="landing" class="max-w-4xl mx-auto py-16 px-4 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">Construa seu currículo profissional em minutos</h1>
+    <p class="text-lg text-gray-700 mb-8">
+      Use IA para destacar seus resultados, escolha entre modelos exclusivos e exporte em PDF. Ideal para quem quer se destacar no mercado!
+    </p>
+    <button id="startBtn" class="bg-blue-600 text-white px-8 py-4 rounded-xl text-xl font-semibold hover:bg-blue-700 transition">Experimente grátis</button>
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="rounded-xl border p-6 bg-white shadow">
+        <h2 class="font-bold text-xl mb-2">Plano Lite</h2>
+        <ul class="text-left text-gray-700 mb-3 list-disc ml-6">
+          <li>Modelos premium desbloqueados</li>
+          <li>Exportação em PDF</li>
+          <li>Suporte por e-mail</li>
+        </ul>
+        <div class="font-bold text-2xl mb-2">R$ 9,90</div>
+        <button class="underline" onclick="showLogin()">Começar</button>
+      </div>
+      <div class="rounded-xl border p-6 bg-white shadow border-amber-300">
+        <h2 class="font-bold text-xl mb-2">Plano Pro</h2>
+        <ul class="text-left text-gray-700 mb-3 list-disc ml-6">
+          <li>Tudo do Lite</li>
+          <li>Carta de apresentação com IA</li>
+          <li>Modelos ilimitados</li>
+        </ul>
+        <div class="font-bold text-2xl mb-2">R$ 19,90</div>
+        <button class="underline" onclick="showLogin()">Começar</button>
+      </div>
+    </div>
+    <div class="mt-14 text-gray-500 text-sm">
+      <div class="mb-3">+1000 currículos gerados por profissionais do Brasil</div>
+      <div class="flex flex-wrap justify-center gap-6">
+        <div class="bg-white rounded p-3 shadow w-60">"Consegui destacar meus resultados! Recomendo." <br/><b>- Ana, SP</b></div>
+        <div class="bg-white rounded p-3 shadow w-60">"O modelo moderno faz diferença na seleção!" <br/><b>- Carlos, RJ</b></div>
+        <div class="bg-white rounded p-3 shadow w-60">"Simples e rápido. PDF pronto para enviar." <br/><b>- Julia, MG</b></div>
+      </div>
+    </div>
+    <div class="ad-placeholder mt-12 w-full">Espaço para anúncio (AdSense real)</div>
+  </div>
+  <!-- Login -->
+  <div id="login" class="hidden flex flex-col items-center justify-center min-h-[70vh]">
+    <h2 class="text-2xl font-bold mb-3">Acesse o Gerador de Currículo</h2>
+    <input id="loginName" class="border rounded p-2 mb-2 w-64" placeholder="Seu nome"/>
+    <input id="loginEmail" class="border rounded p-2 mb-2 w-64" placeholder="Seu e-mail"/>
+    <button id="loginBtn" class="bg-blue-600 text-white px-6 py-2 rounded">Entrar</button>
+    <div id="loginErr" class="text-red-500 mt-2"></div>
+    <div class="text-xs text-gray-500 mt-3">Login simulado para MVP. Use NextAuth/Firebase para produção.</div>
+  </div>
+  <!-- App -->
+  <div id="app" class="hidden max-w-6xl mx-auto p-4 md:p-8">
+    <div class="no-print flex items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2"><span id="iconFileText"></span> Currículo Instantâneo</h1>
+        <p class="text-sm text-gray-600">Crie um currículo profissional em minutos. Grátis para começar.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnImprove" class="bg-gray-200 px-4 py-2 rounded flex items-center gap-2"><span id="iconWand2"></span> Turbinar com IA</button>
+        <button id="btnGenerate" class="bg-blue-600 text-white px-4 py-2 rounded">Gerar Currículo</button>
+      </div>
+    </div>
+    <div class="no-print flex items-center justify-end gap-3 mb-2">
+      <span id="userInfo" class="text-sm text-gray-600 mr-3"></span>
+      <button class="bg-gray-200 px-3 py-1 rounded" onclick="logout()">Sair</button>
+    </div>
+    <div class="no-print grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <!-- Form -->
+      <div class="rounded-2xl shadow-sm bg-white p-4">
+        <h2 class="font-bold mb-3">Seus dados</h2>
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label>Nome completo</label><input id="f_nome" class="border rounded p-2 w-full" /></div>
+            <div><label>Cargo desejado / Título</label><input id="f_titulo" class="border rounded p-2 w-full" /></div>
+            <div><label>E-mail</label><input id="f_email" class="border rounded p-2 w-full" /></div>
+            <div><label>Telefone</label><input id="f_telefone" class="border rounded p-2 w-full" /></div>
+            <div><label>Cidade/UF</label><input id="f_cidade" class="border rounded p-2 w-full" /></div>
+            <div><label>LinkedIn</label><input id="f_linkedin" class="border rounded p-2 w-full" /></div>
+            <div class="md:col-span-2"><label>Portfólio / Site</label><input id="f_portfolio" class="border rounded p-2 w-full" /></div>
+            <div class="md:col-span-2"><label>Resumo profissional</label><textarea id="f_resumo" class="border rounded p-2 w-full" rows="3"></textarea></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Competências (separe por vírgula)</label>
+              <input id="f_skills" class="border rounded p-2 w-full" />
+            </div>
+            <div>
+              <label>Idiomas (separe por vírgula)</label>
+              <input id="f_idiomas" class="border rounded p-2 w-full" />
+            </div>
+          </div>
+          <hr class="my-4"/>
+          <div>
+            <h3 class="font-semibold mb-2">Experiência</h3>
+            <div id="expList"></div>
+            <button id="btnAddExp" class="bg-gray-200 px-4 py-2 rounded flex items-center gap-2 mt-2"><span id="iconPlus"></span> Adicionar experiência</button>
+          </div>
+          <hr class="my-4"/>
+          <div>
+            <h3 class="font-semibold mb-2">Formação</h3>
+            <div id="eduList"></div>
+            <button id="btnAddEdu" class="bg-gray-200 px-4 py-2 rounded flex items-center gap-2 mt-2"><span id="iconPlus2"></span> Adicionar formação</button>
+          </div>
+          <div class="flex items-center gap-3 mt-4">
+            <label class="text-sm">Modelo</label>
+            <select id="template" class="border rounded px-2 py-1">
+              <option value="Básico">Básico (Grátis)</option>
+              <option value="Moderno">Moderno (Premium)</option>
+              <option value="Elegante">Elegante (Premium)</option>
+            </select>
+            <span id="premiumLock" class="inline-flex items-center gap-1 text-xs text-amber-600"></span>
+            <button id="btnUnlock" class="bg-yellow-400 px-3 py-1 rounded text-xs ml-2 hidden"><span id="iconLock"></span> Desbloquear Premium</button>
+          </div>
+          <div class="ad-placeholder mt-4">Espaço para anúncio (AdSense real)</div>
+        </div>
+      </div>
+      <!-- Preview -->
+      <div class="space-y-4">
+        <div class="rounded-2xl shadow-sm bg-white p-4">
+          <h2 class="font-bold mb-3">Preview</h2>
+          <div class="relative">
+            <div id="previewLock" class="absolute inset-0 z-10 bg-white/70 backdrop-blur rounded-xl border flex-col items-center justify-center gap-2 hidden"></div>
+            <div id="preview" class="overflow-auto max-h-[70vh] p-2 bg-slate-100"></div>
+          </div>
+        </div>
+        <div class="no-print flex flex-wrap gap-2">
+          <button id="btnExport" class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"><span id="iconFileText2"></span> Exportar PDF</button>
+          <button id="btnUnlock2" class="bg-yellow-400 px-4 py-2 rounded flex items-center gap-2 hidden"><span id="iconLock2"></span> Desbloquear Premium</button>
+          <button id="btnPremiumActive" class="bg-green-400 px-4 py-2 rounded flex items-center gap-2 hidden"><span id="iconBadge"></span> Premium ativo</button>
+        </div>
+        <div class="ad-placeholder mt-4">Espaço para anúncio (AdSense real)</div>
+      </div>
+    </div>
+    <!-- Paywall -->
+    <div id="paywall" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-lg">
+        <h2 class="text-xl font-bold mb-4">Desbloqueie modelos premium</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-xl border p-4">
+            <h3 class="font-bold text-lg mb-2">Plano Lite</h3>
+            <ul class="list-disc ml-5 space-y-1 text-sm mb-2">
+              <li>2 modelos premium</li>
+              <li>Exportação em PDF</li>
+              <li>Suporte por e-mail</li>
+            </ul>
+            <div class="text-2xl font-bold mb-2">R$ 9,90</div>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded w-full" onclick="unlockPremium('lite')">Escolher Lite</button>
+          </div>
+          <div class="rounded-xl border border-amber-300 p-4">
+            <h3 class="font-bold text-lg mb-2">Plano Pro</h3>
+            <ul class="list-disc ml-5 space-y-1 text-sm mb-2">
+              <li>Tudo do Lite</li>
+              <li>Carta de apresentação com IA</li>
+              <li>Modelos ilimitados</li>
+            </ul>
+            <div class="text-2xl font-bold mb-2">R$ 19,90</div>
+            <button class="bg-yellow-400 text-black px-4 py-2 rounded w-full" onclick="unlockPremium('pro')">Escolher Pro</button>
+          </div>
+        </div>
+        <div class="text-xs text-gray-500 mt-4">Pagamento simulado para o MVP. Integre Stripe/Mercado Pago na função <code>unlockPremium</code>.</div>
+        <button class="absolute top-3 right-4 text-xl" onclick="hidePaywall()">&times;</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Lucide icons
+    lucide.createIcons();
+    lucide.createIcons({ icons: { FileText: document.getElementById("iconFileText"), Wand2: document.getElementById("iconWand2"), Plus: document.getElementById("iconPlus"), Plus: document.getElementById("iconPlus2"), Lock: document.getElementById("iconLock"), FileText: document.getElementById("iconFileText2"), Lock: document.getElementById("iconLock2"), BadgeCheck: document.getElementById("iconBadge") } });
+
+    // State
+    let user = null;
+    let premiumUnlocked = false;
+    let experiencias = [{ cargo: "", empresa: "", periodo: "", descricao: "" }];
+    let educacao = [{ curso: "", instituicao: "", periodo: "" }];
+    let form = {};
+    let generated = null;
+    let template = "Básico";
+    // Helpers
+    function $(id) { return document.getElementById(id); }
+    function showLanding() { $("landing").style.display = ""; $("login").style.display = "none"; $("app").style.display = "none"; }
+    function showLogin() { $("landing").style.display = "none"; $("login").style.display = ""; $("app").style.display = "none"; }
+    function showApp() { $("landing").style.display = "none"; $("login").style.display = "none"; $("app").style.display = ""; }
+    function logout() { user = null; localStorage.removeItem("resumeai_user"); showLogin(); }
+    function unlockPremium(plan) { premiumUnlocked = true; hidePaywall(); updatePremiumUI(); alert("Premium desbloqueado! Pagamento simulado."); }
+    function showPaywall() { $("paywall").style.display = "flex"; }
+    function hidePaywall() { $("paywall").style.display = "none"; }
+    function updatePremiumUI() {
+      // Lock/Unlock on template
+      if (["Moderno","Elegante"].includes(template) && !premiumUnlocked) {
+        $("premiumLock").innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e42" stroke-width="2"><path d="M17 11V7a5 5 0 0 0-10 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 19v-2"/><path d="M17 19v-2"/></svg> Requer Premium';
+        $("btnUnlock").style.display = "";
+        $("btnUnlock2").style.display = "";
+        $("btnPremiumActive").style.display = "none";
+        $("previewLock").style.display = "flex";
+        $("previewLock").innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e42" stroke-width="2"><path d="M17 11V7a5 5 0 0 0-10 0v4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 19v-2"/><path d="M17 19v-2"/></svg><p class="text-sm">Modelo premium. <button class="underline" onclick="showPaywall()">Desbloquear</button></p>';
+      } else if (premiumUnlocked) {
+        $("premiumLock").innerHTML = "";
+        $("btnUnlock").style.display = "none";
+        $("btnUnlock2").style.display = "none";
+        $("btnPremiumActive").style.display = "";
+        $("previewLock").style.display = "none";
+      } else {
+        $("premiumLock").innerHTML = "";
+        $("btnUnlock").style.display = "none";
+        $("btnUnlock2").style.display = "none";
+        $("btnPremiumActive").style.display = "none";
+        $("previewLock").style.display = "none";
+      }
+    }
+    // Login logic
+    $("startBtn").onclick = showLogin;
+    $("loginBtn").onclick = function() {
+      let name = $("loginName").value.trim();
+      let email = $("loginEmail").value.trim();
+      if (!name || !email.match(/@/)) {
+        $("loginErr").innerText = "Preencha nome e email válido!";
+        return;
+      }
+      user = { name, email }; localStorage.setItem("resumeai_user", JSON.stringify(user));
+      $("userInfo").innerText = `${user.name} (${user.email})`;
+      showApp();
+      renderForm();
+      renderPreview();
+    };
+    // If logged in, go directly to app
+    window.onload = function() {
+      let u = localStorage.getItem("resumeai_user");
+      if (u) { user = JSON.parse(u); $("userInfo").innerText = `${user.name} (${user.email})`; showApp(); }
+    };
+
+    // Form logic
+    function renderForm() {
+      // Fill form fields if any
+      $("f_nome").value = form.nome || "";
+      $("f_titulo").value = form.titulo || "";
+      $("f_email").value = form.email || "";
+      $("f_telefone").value = form.telefone || "";
+      $("f_cidade").value = form.cidade || "";
+      $("f_linkedin").value = form.linkedin || "";
+      $("f_portfolio").value = form.portfolio || "";
+      $("f_resumo").value = form.resumo || "";
+      $("f_skills").value = form.skills || "";
+      $("f_idiomas").value = form.idiomas || "";
+      $("template").value = template;
+      // Experiência
+      let expHtml = "";
+      experiencias.forEach((e, i) => {
+        expHtml += `<div class="border rounded p-2 mb-2 flex flex-col gap-2">
+          <input class="border rounded p-1 mb-1" placeholder="Cargo" value="${e.cargo}" onchange="updateExp(${i},'cargo',this.value)" />
+          <input class="border rounded p-1 mb-1" placeholder="Empresa" value="${e.empresa}" onchange="updateExp(${i},'empresa',this.value)" />
+          <input class="border rounded p-1 mb-1" placeholder="Período" value="${e.periodo}" onchange="updateExp(${i},'periodo',this.value)" />
+          <textarea class="border rounded p-1 mb-1" rows="2" placeholder="Resultados / Atividades" onchange="updateExp(${i},'descricao',this.value)">${e.descricao}</textarea>
+          <button class="text-xs text-red-500 underline self-end" onclick="delExp(${i})">Remover</button>
+        </div>`;
+      });
+      $("expList").innerHTML = expHtml;
+      // Formação
+      let eduHtml = "";
+      educacao.forEach((e, i) => {
+        eduHtml += `<div class="border rounded p-2 mb-2 flex flex-col gap-2">
+          <input class="border rounded p-1 mb-1" placeholder="Curso" value="${e.curso}" onchange="updateEdu(${i},'curso',this.value)" />
+          <input class="border rounded p-1 mb-1" placeholder="Instituição" value="${e.instituicao}" onchange="updateEdu(${i},'instituicao',this.value)" />
+          <input class="border rounded p-1 mb-1" placeholder="Período" value="${e.periodo}" onchange="updateEdu(${i},'periodo',this.value)" />
+          <button class="text-xs text-red-500 underline self-end" onclick="delEdu(${i})">Remover</button>
+        </div>`;
+      });
+      $("eduList").innerHTML = eduHtml;
+      updatePremiumUI();
+    }
+    window.updateExp = function(i, key, val) { experiencias[i][key] = val; renderPreview(); }
+    window.delExp = function(i) { experiencias.splice(i,1); renderForm(); renderPreview(); }
+    window.updateEdu = function(i, key, val) { educacao[i][key] = val; renderPreview(); }
+    window.delEdu = function(i) { educacao.splice(i,1); renderForm(); renderPreview(); }
+
+    $("btnAddExp").onclick = function() { experiencias.push({ cargo: "", empresa: "", periodo: "", descricao: "" }); renderForm(); };
+    $("btnAddEdu").onclick = function() { educacao.push({ curso: "", instituicao: "", periodo: "" }); renderForm(); };
+
+    // Update template
+    $("template").onchange = function() { template = this.value; updatePremiumUI(); renderPreview(); };
+
+    // Premium unlock
+    $("btnUnlock").onclick = showPaywall;
+    $("btnUnlock2").onclick = showPaywall;
+
+    // IA - Turbinar
+    $("btnImprove").onclick = function() {
+      getForm();
+      form = improveWithAI(form);
+      experiencias = form.experiencias;
+      educacao = form.educacao;
+      renderForm();
+      renderPreview();
+    };
+
+    // Gerar
+    $("btnGenerate").onclick = function() { getForm(); generated = {...form}; renderPreview(); };
+
+    // Export PDF
+    $("btnExport").onclick = function() {
+      if (["Moderno","Elegante"].includes(template) && !premiumUnlocked) { showPaywall(); return; }
+      window.print();
+    };
+
+    // Premium fake unlock
+    $("btnPremiumActive").onclick = function() { alert("Premium ativo!"); }
+
+    // Form read
+    function getForm() {
+      form = {
+        nome: $("f_nome").value,
+        titulo: $("f_titulo").value,
+        email: $("f_email").value,
+        telefone: $("f_telefone").value,
+        cidade: $("f_cidade").value,
+        linkedin: $("f_linkedin").value,
+        portfolio: $("f_portfolio").value,
+        resumo: $("f_resumo").value,
+        skills: $("f_skills").value,
+        idiomas: $("f_idiomas").value,
+        experiencias: experiencias,
+        educacao: educacao,
+      };
+    }
+
+    // IA heurística local
+    function improveSentence(s) {
+      if (!s) return s;
+      return s
+        .replace(/respons[aá]vel por/gi, "Liderei")
+        .replace(/ajudei/gi, "Contribuí")
+        .replace(/fiz/gi, "Executei")
+        .replace(/trabalhei/gi, "Atuei")
+        .replace(/melhor(a|e)r/gi, "otimizar")
+        .replace(/aument(ar|ei)/gi, "impulsionar")
+        .replace(/diminu(ir|i)/gi, "reduzir")
+        .replace(/(\b)(eu )/gi, "$1")
+        .trim();
+    }
+    function bulletize(text) {
+      if (!text) return [];
+      return text
+        .split(/\n|\.|;|\u2022/g)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .map(improveSentence);
+    }
+    function improveWithAI(form) {
+      return {
+        ...form,
+        resumo: improveSentence(form.resumo)
+          .replace(/^/g, "Profissional focado em resultados. ")
+          .replace(/\s+/g, " "),
+        experiencias: form.experiencias.map((e) => ({
+          ...e,
+          descricao: bulletize(e.descricao)
+            .map((b) => (b.match(/^(lider(ei|ar)|liderei|conduzi|otimizei|implementei|reduzi|impulsionei)/i) ? b : `Liderei ${b.toLowerCase()}`))
+            .slice(0, 6)
+            .join("\n• "),
+        })),
+        skills: form.skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .map((s) => s.replace(/(^[a-z])/, (m) => m.toUpperCase()))
+          .join(", "),
+      };
+    }
+
+    // Render preview
+    function renderPreview() {
+      getForm();
+      let f = generated || form;
+      let listSkills = (f.skills||"").split(",").map(s=>s.trim()).filter(Boolean);
+      let listIdiomas = (f.idiomas||"").split(",").map(s=>s.trim()).filter(Boolean);
+      let html = "";
+      // Modelos
+      if (template === "Básico") {
+        html = `<div class="w-[794px] min-h-[1123px] mx-auto bg-white shadow-lg print:shadow-none p-8 space-y-6">
+          <header class="border-b pb-4">
+            <h1 class="text-3xl font-bold">${f.nome||"Seu Nome"}</h1>
+            <p class="text-sm text-gray-600">${f.titulo||"Cargo desejado"}</p>
+            <div class="mt-2 text-xs text-gray-600 flex flex-wrap gap-3">
+              ${f.email ? `<span>${f.email}</span>`:""}
+              ${f.telefone ? `<span>${f.telefone}</span>`:""}
+              ${f.cidade ? `<span>${f.cidade}</span>`:""}
+              ${f.linkedin ? `<a class="underline" href="${f.linkedin}" target="_blank">LinkedIn</a>`:""}
+              ${f.portfolio ? `<a class="underline" href="${f.portfolio}" target="_blank">Portfólio</a>`:""}
+            </div>
+          </header>
+          ${f.resumo ? `<section><h2 class="font-semibold text-lg mb-2">Resumo</h2><p class="text-sm leading-relaxed whitespace-pre-line">${f.resumo}</p></section>`:""}
+          ${(f.experiencias||[]).filter(e=>e.cargo||e.empresa||e.descricao).length ? `<section><h2 class="font-semibold text-lg mb-2">Experiência</h2>
+          <div class="space-y-3">${f.experiencias.map((e,idx)=>(e.cargo||e.empresa||e.descricao)?`
+            <div>
+              <div class="flex items-center justify-between">
+                <p class="font-medium">${e.cargo||"Cargo"} <span class="text-gray-600">· ${e.empresa||"Empresa"}</span></p>
+                <p class="text-xs text-gray-600">${e.periodo}</p>
+              </div>
+              <p class="text-sm whitespace-pre-line leading-relaxed mt-1">${e.descricao}</p>
+            </div>
+          `:"").join("")}</div></section>`:""}
+          ${(f.educacao||[]).filter(e=>e.curso||e.instituicao).length ? `<section><h2 class="font-semibold text-lg mb-2">Formação</h2>
+          <ul class="space-y-2 text-sm">${f.educacao.map((e,idx)=>(e.curso||e.instituicao)?`
+            <li>
+              <p class="font-medium">${e.curso||"Curso"}</p>
+              <p class="text-gray-600 text-xs">${e.instituicao} ${e.periodo&&`· ${e.periodo}`}</p>
+            </li>
+          `:"").join("")}</ul></section>`:""}
+          ${(listSkills.length || listIdiomas.length) ? `<section class="grid grid-cols-2 gap-6">
+            ${listSkills.length ? `<div><h2 class="font-semibold text-lg mb-2">Competências</h2>
+              <ul class="text-sm list-disc ml-5 space-y-1">${listSkills.map((s,i)=>`<li>${s}</li>`).join("")}</ul></div>`:""}
+            ${listIdiomas.length ? `<div><h2 class="font-semibold text-lg mb-2">Idiomas</h2>
+              <ul class="text-sm list-disc ml-5 space-y-1">${listIdiomas.map((s,i)=>`<li>${s}</li>`).join("")}</ul></div>`:""}
+          </section>`:""}
+        </div>`;
+      } else if (template === "Moderno") {
+        html = `<div class="grid grid-cols-[260px_1fr] min-h-[1123px] w-[794px] mx-auto bg-white shadow-lg print:shadow-none">
+          <aside class="bg-gray-900 text-white p-8">
+            <h1 class="text-2xl font-bold leading-tight">${f.nome||"Seu Nome"}</h1>
+            <p class="text-sm opacity-80">${f.titulo||"Cargo desejado"}</p>
+            <div class="h-px bg-gray-700 my-4"></div>
+            <div class="space-y-2 text-xs opacity-90">
+              ${f.email?`<p>${f.email}</p>`:""}
+              ${f.telefone?`<p>${f.telefone}</p>`:""}
+              ${f.cidade?`<p>${f.cidade}</p>`:""}
+              ${f.linkedin?`<p><a class="underline" href="${f.linkedin}" target="_blank">LinkedIn</a></p>`:""}
+              ${f.portfolio?`<p><a class="underline" href="${f.portfolio}" target="_blank">Portfólio</a></p>`:""}
+            </div>
+            ${(f.skills||f.idiomas)?`<div class="h-px bg-gray-700 my-4"></div>`:""}
+            ${f.skills?`<div class="mb-4"><h2 class="font-semibold mb-2">Competências</h2>
+              <ul class="text-xs space-y-1 list-disc ml-4">${listSkills.map((s,i)=>`<li>${s}</li>`).join("")}</ul></div>`:""}
+            ${f.idiomas?`<div><h2 class="font-semibold mb-2">Idiomas</h2>
+              <ul class="text-xs space-y-1 list-disc ml-4">${listIdiomas.map((s,i)=>`<li>${s}</li>`).join("")}</ul></div>`:""}
+          </aside>
+          <main class="p-10 space-y-6">
+            ${f.resumo?`<section><h2 class="font-semibold text-lg mb-2">Resumo</h2><p class="text-sm leading-relaxed whitespace-pre-line">${f.resumo}</p></section>`:""}
+            ${(f.experiencias||[]).filter(e=>e.cargo||e.empresa||e.descricao).length?`<section><h2 class="font-semibold text-lg mb-2">Experiência</h2>
+              <div class="space-y-4">${f.experiencias.map((e,idx)=>(e.cargo||e.empresa||e.descricao)?`
+                <div>
+                  <p class="font-medium">${e.cargo||"Cargo"} · <span class="text-gray-600">${e.empresa||"Empresa"}</span></p>
+                  <p class="text-xs text-gray-500">${e.periodo}</p>
+                  <p class="text-sm whitespace-pre-line leading-relaxed mt-1">${e.descricao}</p>
+                </div>
+              `:"").join("")}</div>
+            </section>`:""}
+            ${(f.educacao||[]).filter(e=>e.curso||e.instituicao).length?`<section><h2 class="font-semibold text-lg mb-2">Formação</h2>
+              <ul class="space-y-2 text-sm">${f.educacao.map((e,idx)=>(e.curso||e.instituicao)?`
+                <li>
+                  <p class="font-medium">${e.curso||"Curso"}</p>
+                  <p class="text-gray-600 text-xs">${e.instituicao} ${e.periodo&&`· ${e.periodo}`}</p>
+                </li>
+              `:"").join("")}</ul>
+            </section>`:""}
+          </main>
+        </div>`;
+      } else if (template === "Elegante") {
+        html = `<div class="p-10 w-[794px] min-h-[1123px] mx-auto bg-white shadow-lg print:shadow-none">
+          <header class="text-center mb-6">
+            <h1 class="text-4xl tracking-tight font-serif">${f.nome||"Seu Nome"}</h1>
+            <p class="uppercase tracking-widest text-xs text-gray-600">${f.titulo||"Cargo desejado"}</p>
+            <div class="mt-2 text-xs text-gray-600 flex gap-3 justify-center">
+              ${f.email?`<span>${f.email}</span>`:""}
+              ${f.telefone?`<span>${f.telefone}</span>`:""}
+              ${f.cidade?`<span>${f.cidade}</span>`:""}
+              ${f.linkedin?`<a class="underline" href="${f.linkedin}" target="_blank">LinkedIn</a>`:""}
+              ${f.portfolio?`<a class="underline" href="${f.portfolio}" target="_blank">Portfólio</a>`:""}
+            </div>
+          </header>
+          ${f.resumo?`<section class="mb-6"><h2 class="font-semibold tracking-wide mb-1">Resumo</h2>
+            <div class="h-px bg-gray-200 mb-3"></div>
+            <p class="text-sm leading-relaxed whitespace-pre-line">${f.resumo}</p>
+          </section>`:""}
+          <section class="grid grid-cols-2 gap-8">
+            <div>
+              ${(f.experiencias||[]).filter(e=>e.cargo||e.empresa||e.descricao).length?`
+                <div>
+                  <h2 class="font-semibold tracking-wide mb-1">Experiência</h2>
+                  <div class="h-px bg-gray-200 mb-3"></div>
+                  <div class="space-y-4">${f.experiencias.map((e,idx)=>(e.cargo||e.empresa||e.descricao)?`
+                    <div>
+                      <p class="font-medium">${e.cargo||"Cargo"}</p>
+                      <p class="text-xs text-gray-600">${e.empresa} ${e.periodo&&`· ${e.periodo}`}</p>
+                      <p class="text-sm whitespace-pre-line leading-relaxed mt-1">${e.descricao}</p>
+                    </div>
+                  `:"").join("")}</div>
+                </div>`:""}
+            </div>
+            <div>
+              ${(f.educacao||[]).filter(e=>e.curso||e.instituicao).length?`
+                <div class="mb-6">
+                  <h2 class="font-semibold tracking-wide mb-1">Formação</h2>
+                  <div class="h-px bg-gray-200 mb-3"></div>
+                  <ul class="space-y-2 text-sm">${f.educacao.map((e,idx)=>(e.curso||e.instituicao)?`
+                    <li>
+                      <p class="font-medium">${e.curso||"Curso"}</p>
+                      <p class="text-gray-600 text-xs">${e.instituicao} ${e.periodo&&`· ${e.periodo}`}</p>
+                    </li>
+                  `:"").join("")}</ul>
+                </div>`:""}
+              ${(listSkills.length || listIdiomas.length)?`
+                <div class="grid grid-cols-2 gap-6">
+                  ${listSkills.length?`
+                    <div>
+                      <h2 class="font-semibold tracking-wide mb-1">Competências</h2>
+                      <div class="h-px bg-gray-200 mb-3"></div>
+                      <ul class="text-sm list-disc ml-5 space-y-1">${listSkills.map((s,i)=>`<li>${s}</li>`).join("")}</ul>
+                    </div>
+                  `:""}
+                  ${listIdiomas.length?`
+                    <div>
+                      <h2 class="font-semibold tracking-wide mb-1">Idiomas</h2>
+                      <div class="h-px bg-gray-200 mb-3"></div>
+                      <ul class="text-sm list-disc ml-5 space-y-1">${listIdiomas.map((s,i)=>`<li>${s}</li>`).join("")}</ul>
+                    </div>
+                  `:""}
+                </div>
+              `:""}
+            </div>
+          </section>
+        </div>`;
+      }
+      $("preview").innerHTML = html;
+    }
+    // Initial render
+    renderForm();
+    renderPreview();
+  </script>
+</body>
+</html>
